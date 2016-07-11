@@ -1,9 +1,6 @@
 package com.vnev.android.moviedb;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.design.widget.CoordinatorLayout;
@@ -21,8 +18,6 @@ import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.RelativeLayout;
 
-
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,15 +33,9 @@ import java.util.List;
 
 public class MainActivityFragment extends Fragment {
 
-<<<<<<< HEAD
     private List<Movie> movieList = new ArrayList<>();
     private RecyclerView view;
-=======
-    private MovieAdapter adapter;
->>>>>>> parent of 5d765fe... Fix sort selection
     private static int PAGE = 1;
-    private static final String[] SORT_OPTIONS = new String[]{"Popular", "Top Rated"};
-    private static int sort_type = 0;
 
     public MainActivityFragment() {
         setHasOptionsMenu(true);
@@ -54,41 +43,55 @@ public class MainActivityFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_main, menu);
+
+        MenuItem sortByPopularity = menu.findItem(R.id.sort_by_popularity);
+        MenuItem sortByRating = menu.findItem(R.id.sort_by_rating);
+
+        if (!sortByPopularity.isChecked()) {
+            sortByPopularity.setChecked(true);
+        }
+        else if (!sortByRating.isChecked()) {
+                sortByRating.setChecked(true);
+        }
     }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_sort) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setTitle("Sort by");
-
-            builder.setItems(MainActivityFragment.SORT_OPTIONS, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    MainActivityFragment.sort_type = i;
+        switch (id) {
+            case R.id.sort_by_popularity:
+                if (item.isChecked()) {
+                    item.setChecked(false);
+                } else {
+                    item.setChecked(true);
                 }
-            });
-
-            AlertDialog dialog = builder.create();
-            dialog.show();
+                updateMovies("popular");
+                return true;
+            case R.id.sort_by_rating:
+                if (item.isChecked()) {
+                    item.setChecked(false);
+                } else {
+                    item.setChecked(true);
+                }
+                updateMovies("top_rated");
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
+    }
 
-        return super.onOptionsItemSelected(item);
+    private void updateMovies(String sort_type) {
+        final MovieSyncTask fetchTask = new MovieSyncTask();
+        fetchTask.execute(sort_type, Integer.toString(PAGE));
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-<<<<<<< HEAD
         view = (RecyclerView) rootView.findViewById(R.id.gridview_movie);
         LinearLayoutManager layoutManager = new LinearLayoutManager(super.getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -97,33 +100,8 @@ public class MainActivityFragment extends Fragment {
         view.setHasFixedSize(true);
 
         MovieAdapter adapter = new MovieAdapter(movieList);
-=======
-        adapter = new MovieAdapter(getActivity(),
-                R.layout.grid_view_item,
-                R.id.grid_item_img,
-                new ArrayList<Movie>());
-        GridView view = (GridView) rootView.findViewById(R.id.gridview_movie);
->>>>>>> parent of 5d765fe... Fix sort selection
         view.setAdapter(adapter);
-
-        final MovieSyncTask task = new MovieSyncTask();
-        task.execute(SORT_OPTIONS[sort_type].toLowerCase(), Integer.toString(PAGE));
-
-//        view.setOnScrollListener(new AbsListView.OnScrollListener() {
-//            @Override
-//            public void onScrollStateChanged(AbsListView absListView, int i) {
-//
-//            }
-//
-//            @Override
-//            public void onScroll(AbsListView absListView, int firstCount, int visibleCount,
-//                                 int totalCount) {
-//                if (firstCount + visibleCount >= totalCount) {
-//                    PAGE += 1;
-//                    task.execute("popular", Integer.toString(PAGE));
-//                }
-//            }
-//        });
+        updateMovies("popular");
 
         return rootView;
     }
@@ -165,7 +143,7 @@ public class MainActivityFragment extends Fragment {
         protected void onPreExecute() {
             super.onPreExecute();
             fetchProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            fetchProgress.setMessage("Loading movies...");
+            fetchProgress.setMessage("Loading...");
             fetchProgress.setIndeterminate(false);
             fetchProgress.setCancelable(false);
             fetchProgress.show();
@@ -188,7 +166,7 @@ public class MainActivityFragment extends Fragment {
                 final String PAGE_QUERY = "page";
 
                 Uri builtUri = Uri.parse(BASE_URL).buildUpon()
-                        .appendPath(params[0])
+                        .appendEncodedPath(params[0])
                         .appendQueryParameter(PAGE_QUERY, params[1])
                         .appendQueryParameter(API_QUERY, API_KEY)
                         .build();
@@ -244,12 +222,8 @@ public class MainActivityFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Movie[] movies) {
-<<<<<<< HEAD
             movieList.clear();
-=======
->>>>>>> parent of 5d765fe... Fix sort selection
             if (movies != null) {
-//                adapter.clear();
                 for (Movie mv : movies) {
                     movieList.add(mv);
                 }
@@ -257,6 +231,12 @@ public class MainActivityFragment extends Fragment {
                     fetchProgress.dismiss();
                 }
             }
+        }
+
+        @Override
+        protected void onCancelled() {
+            fetchProgress.dismiss();
+            super.onCancelled();
         }
     }
 }
