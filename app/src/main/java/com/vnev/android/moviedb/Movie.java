@@ -1,6 +1,5 @@
 package com.vnev.android.moviedb;
 
-import android.media.Image;
 
 /**
  * Created by ddqqyyzz on 6/24/16.
