@@ -1,7 +1,6 @@
-<android.support.v7.widget.RecyclerView android:layout_width="match_parent"
+<GridView android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:numColumns="auto_fit"
-    android:scrollbars="vertical"
     android:columnWidth="@dimen/grid_item_movie_width"
     android:verticalSpacing="@dimen/grid_item_movie_spacing"
     android:drawSelectorOnTop="true"

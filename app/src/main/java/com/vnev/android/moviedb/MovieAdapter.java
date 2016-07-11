@@ -1,7 +1,6 @@
 package com.vnev.android.moviedb;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,37 +14,26 @@ import java.util.List;
 /**
  * Created by ddqqyyzz on 6/24/16.
  */
-public class MovieAdapter extends RecyclerView.Adapter
-        <ListItemViewHolder> {
+public class MovieAdapter extends ArrayAdapter<Movie> {
 
-    private List<Movie> items;
-    private Context context;
+    public MovieAdapter(Context context, int resource, int textViewResourceId, List<Movie> objects) {
+        super(context, resource, textViewResourceId, objects);
+    }
 
-    MovieAdapter(List<Movie> data) {
-        if (data == null) {
-            throw new IllegalArgumentException("data must not be null");
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        Movie movie = getItem(position);
+
+        if (convertView == null) {
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.grid_view_item, parent,
+                                                                    false);
         }
 
-        this.items = data;
-    }
+        ImageView poster_view = (ImageView) convertView.findViewById(R.id.grid_item_img);
+        Picasso.with(getContext()).load(movie.getPoster()).into(poster_view);
 
-    @Override
-    public ListItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.grid_view_item,
-                parent,
-                false);
-        context = parent.getContext();
-        return new ListItemViewHolder(view);
-    }
+//        ((TextView) convertView.findViewById(R.id.grid_item_title)).setText(movie.getMovieTitle());
 
-    @Override
-    public void onBindViewHolder(ListItemViewHolder holder, int position) {
-        Movie movie = items.get(position);
-        Picasso.with(context).load(movie.getPoster()).into(holder.poster);
-    }
-
-    @Override
-    public int getItemCount() {
-        return items.size();
+        return convertView;
     }
 }
