@@ -1,6 +1,7 @@
 package com.vnev.android.moviedb;
 
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,26 +15,37 @@ import java.util.List;
 /**
  * Created by ddqqyyzz on 6/24/16.
  */
-public class MovieAdapter extends ArrayAdapter<Movie> {
+public class MovieAdapter extends RecyclerView.Adapter
+        <ListItemViewHolder> {
 
-    public MovieAdapter(Context context, int resource, int textViewResourceId, List<Movie> objects) {
-        super(context, resource, textViewResourceId, objects);
+    private List<Movie> items;
+    private Context context;
+
+    MovieAdapter(List<Movie> data) {
+        if (data == null) {
+            throw new IllegalArgumentException("data must not be null");
+        }
+
+        this.items = data;
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        Movie movie = getItem(position);
+    public ListItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.grid_view_item,
+                parent,
+                false);
+        context = parent.getContext();
+        return new ListItemViewHolder(view);
+    }
 
-        if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.grid_view_item, parent,
-                                                                    false);
-        }
+    @Override
+    public void onBindViewHolder(ListItemViewHolder holder, int position) {
+        Movie movie = items.get(position);
+        Picasso.with(context).load(movie.getPoster()).into(holder.poster);
+    }
 
-        ImageView poster_view = (ImageView) convertView.findViewById(R.id.grid_item_img);
-        Picasso.with(getContext()).load(movie.getPoster()).into(poster_view);
-
-//        ((TextView) convertView.findViewById(R.id.grid_item_title)).setText(movie.getMovieTitle());
-
-        return convertView;
+    @Override
+    public int getItemCount() {
+        return items.size();
     }
 }

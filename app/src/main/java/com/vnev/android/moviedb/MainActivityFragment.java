@@ -3,8 +3,11 @@ package com.vnev.android.moviedb;
 import android.app.ProgressDialog;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -13,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
+import android.widget.RelativeLayout;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,11 +29,12 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivityFragment extends Fragment {
 
-    private MovieAdapter adapter;
-    private GridView view;
+    private List<Movie> movieList = new ArrayList<>();
+    private RecyclerView view;
     private static int PAGE = 1;
 
     public MainActivityFragment() {
@@ -87,11 +92,14 @@ public class MainActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        adapter = new MovieAdapter(getActivity(),
-                R.layout.grid_view_item,
-                R.id.grid_item_img,
-                new ArrayList<Movie>());
-        view = (GridView) rootView.findViewById(R.id.gridview_movie);
+        view = (RecyclerView) rootView.findViewById(R.id.gridview_movie);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(super.getActivity());
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        layoutManager.scrollToPosition(0);
+        view.setLayoutManager(layoutManager);
+        view.setHasFixedSize(true);
+
+        MovieAdapter adapter = new MovieAdapter(movieList);
         view.setAdapter(adapter);
         updateMovies("popular");
 
@@ -214,10 +222,10 @@ public class MainActivityFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Movie[] movies) {
-            adapter.clear();
+            movieList.clear();
             if (movies != null) {
                 for (Movie mv : movies) {
-                    adapter.add(mv);
+                    movieList.add(mv);
                 }
                 if (fetchProgress != null && fetchProgress.isShowing()) {
                     fetchProgress.dismiss();
